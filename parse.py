@@ -4,30 +4,35 @@ from io import StringIO
 
 
 class DataParser:
-    def __init__(self, file):
-        with open(file) as f:
-            self.file = f.readlines()
+    def __init__(self, file: str):
+        self.COLUMNS = ["Time", "Altitude", "Velocity", "Temperature (F)", "Voltage"]
+        self.file = file
+        self.split_file = self.file.split("\n")
 
     def parse(self):
+        # get the csv data
         self.data_csv = ""
-        include = False
-        for line in self.file:
-            if line.startswith("Data"):
-                include = True
+        self.metadata = ""
+        csv_include = False
+        for line in self.split_file:
+            if line == "":
+                # skip blank lines
                 continue
-            if include:
+            if line.startswith("Data"):
+                csv_include = True
+                continue
+            if csv_include:
                 self.data_csv += line
-        print(self.data_csv)
+            else:
+                self.metadata += line
 
-    def get_dataframe(self):
+        # make dataframe
         self.df = pd.read_csv(
             StringIO(self.data_csv),
-            names=["Time", "Altitude", "Velocity", "Temperature (F)", "Voltage"],
+            names=self.COLUMNS,
         )
-        return self.df
 
 
 if __name__ == "__main__":
     a = DataParser(".data/4B 109.pf2")
     a.parse()
-    a.get_dataframe()

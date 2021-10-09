@@ -12,11 +12,23 @@ file = st.file_uploader("Upload your pf2 file", ("pf2"))
 if file:
     # get string from file
     string_data = StringIO(file.getvalue().decode("utf-8")).read()
-    st.code(string_data)
 
-    # parser = DataParser(string_data)
-    # parser.parse()
-    # df = parser.get_dataframe()
+    parser = DataParser(string_data)
+    parser.parse()
 
-    # # graph it
-    # st.line_chart(data=df["Time", "Altitude"])
+    "### Metadata"
+    st.code(parser.metadata)
+
+    st.dataframe(parser.df)
+
+    # graph it
+    fig, ax = plt.subplots()
+    ax.plot(parser.df["Time"], parser.df["Altitude"])
+    st.pyplot(fig)
+    # parser.df
+    # st.line_chart(data=parser.df[["Time", "Altitude"]])
+    # st.line_chart(data=[parser.df["Time"], parser.df["Altitude"]])
+
+    "### Full data"
+    with st.expander("See full data"):
+        st.code(string_data)
