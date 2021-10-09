@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from parse import DataParser
 import matplotlib.pyplot as plt
 from io import StringIO
@@ -9,25 +8,36 @@ st.title("Pnut Altimeter Data Parser")
 
 file = st.file_uploader("Upload your pf2 file", ("pf2"))
 
+
 if file:
     # get string from file
     string_data = StringIO(file.getvalue().decode("utf-8")).read()
 
-    parser = DataParser(string_data)
-    parser.parse()
+    Parser = DataParser(string_data)
+    Parser.parse()
 
-    "### Metadata"
-    st.code(parser.metadata)
-
-    st.dataframe(parser.df)
-
-    # graph it
+    "### Time vs Altitude Graph"
     fig, ax = plt.subplots()
-    ax.plot(parser.df["Time"], parser.df["Altitude"])
+    ax.plot(Parser.df["Time"], Parser.df["Altitude"])
     st.pyplot(fig)
-    # parser.df
-    # st.line_chart(data=parser.df[["Time", "Altitude"]])
-    # st.line_chart(data=[parser.df["Time"], parser.df["Altitude"]])
+
+    left, right = st.columns([1, 1.5])
+
+    with left:
+        st.metric("Apogee", f"{Parser.apogee} feet")
+        "### Metadata"
+        st.code(Parser.metadata)
+
+    with right:
+        st.metric("Flight number", Parser.flight_number)
+        "### Flight data"
+        st.dataframe(Parser.df)
+        st.download_button(
+            "Download data spreadsheet",
+            Parser.df.to_csv(line_terminator="\r\n", index=False),
+            file_name="data.csv",
+            on_click=st.balloons,
+        )
 
     "### Full data"
     with st.expander("See full data"):
